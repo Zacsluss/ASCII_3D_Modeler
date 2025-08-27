@@ -559,3 +559,85 @@ document.getElementById("mobile-screenshot").addEventListener("click", function 
 
 document.getElementById("mobile-download-html").addEventListener("click", downloadHTML);
 document.getElementById("mobile-new-window").addEventListener("click", openInNewWindow);
+
+// Welcome screen functionality
+document.getElementById("start-button").addEventListener("click", function() {
+    const welcomeScreen = document.getElementById("welcome-screen");
+    welcomeScreen.style.opacity = "0";
+    welcomeScreen.style.transform = "scale(0.95)";
+    setTimeout(() => {
+        welcomeScreen.style.display = "none";
+        // Show the main UI
+        document.getElementById("ui-container").classList.remove("hidden");
+    }, 300);
+});
+
+document.getElementById("download-app-button").addEventListener("click", function() {
+    // Create download link for the full application
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII 3D Modeler - Offline Version</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .download-container { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .download-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="download-container">
+        <div class="download-card">
+            <h1 class="text-3xl font-bold mb-4 text-gray-800">ASCII 3D Modeler</h1>
+            <p class="text-gray-600 mb-8">To download the complete source code:</p>
+            
+            <div class="space-y-4">
+                <a href="https://github.com/Zacsluss/ASCII_3D_Modeler/archive/refs/heads/main.zip" 
+                   class="block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    Download ZIP File
+                </a>
+                
+                <p class="text-sm text-gray-500">or clone with Git:</p>
+                <div class="bg-gray-100 p-3 rounded-lg text-sm font-mono text-left">
+                    git clone https://github.com/Zacsluss/ASCII_3D_Modeler.git
+                </div>
+                
+                <a href="https://github.com/Zacsluss/ASCII_3D_Modeler" target="_blank"
+                   class="block text-blue-600 hover:text-blue-800 font-medium">
+                    View on GitHub →
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>`;
+
+    const newWindow = window.open('', '_blank', 'width=600,height=700,scrollbars=yes,resizable=yes');
+    newWindow.document.write(htmlContent);
+    newWindow.document.close();
+});
+
+// Initialize welcome screen with animations
+document.addEventListener('DOMContentLoaded', function() {
+    const welcomeScreen = document.getElementById("welcome-screen");
+    welcomeScreen.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+    
+    // Hide main UI initially
+    document.getElementById("ui-container").classList.add("hidden");
+});
