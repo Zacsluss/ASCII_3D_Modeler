@@ -420,3 +420,142 @@ function resetPositions() {
 document.getElementById('mobile-menu-button').addEventListener('click', function () {
     document.getElementById('ui-container').classList.toggle('hidden');
 });
+
+// Download HTML functionality
+function downloadHTML() {
+    const asciiContent = document.getElementsByTagName("table")[0]?.innerText || "No ASCII content available";
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII 3D Model Output</title>
+    <style>
+        body {
+            background-color: ${isDarkMode ? '#000' : '#fff'};
+            color: ${isDarkMode ? '#fff' : '#000'};
+            font-family: 'Courier New', monospace;
+            margin: 20px;
+            padding: 20px;
+        }
+        .ascii-container {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 1;
+            text-align: center;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ASCII 3D Modeler Output</h1>
+        <p>Generated from 3D model conversion</p>
+    </div>
+    <div class="ascii-container">${asciiContent}</div>
+</body>
+</html>`;
+
+    const filename = "ASCII_3D_Model.html";
+    download(filename, htmlContent);
+}
+
+// Open in new window functionality
+function openInNewWindow() {
+    const asciiContent = document.getElementsByTagName("table")[0]?.innerText || "No ASCII content available";
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII 3D Model - Preview</title>
+    <style>
+        body {
+            background-color: ${isDarkMode ? '#111' : '#fff'};
+            color: ${isDarkMode ? '#fff' : '#000'};
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .ascii-container {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 1;
+            text-align: center;
+            border: 2px solid ${isDarkMode ? '#333' : '#ddd'};
+            padding: 20px;
+            border-radius: 8px;
+            background: ${isDarkMode ? '#1a1a1a' : '#f9f9f9'};
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ASCII 3D Model Preview</h1>
+        <p>Generated with ASCII 3D Modeler</p>
+    </div>
+    <div class="ascii-container">${asciiContent}</div>
+    <div class="controls">
+        <button onclick="window.print()">Print</button>
+        <button onclick="window.close()">Close</button>
+    </div>
+</body>
+</html>`;
+
+    const newWindow = window.open('', '_blank', 'width=1000,height=800,scrollbars=yes,resizable=yes');
+    newWindow.document.write(htmlContent);
+    newWindow.document.close();
+}
+
+// Add event listeners for new buttons
+document.getElementById("downloadHTMLButton").addEventListener("click", downloadHTML);
+document.getElementById("openNewWindowButton").addEventListener("click", openInNewWindow);
+
+// Mobile button event listeners
+document.getElementById("mobile-clipboard").addEventListener("click", function () {
+    document.getElementById("clipboardASCII").click();
+});
+
+document.getElementById("mobile-download").addEventListener("click", function () {
+    document.getElementById("copyASCII").click();
+});
+
+document.getElementById("mobile-screenshot").addEventListener("click", function () {
+    document.getElementById("screenshotButton").click();
+});
+
+document.getElementById("mobile-download-html").addEventListener("click", downloadHTML);
+document.getElementById("mobile-new-window").addEventListener("click", openInNewWindow);

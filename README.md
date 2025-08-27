@@ -9,12 +9,4 @@ The ASCII 3D Modeler is a lightweight and easy way to convert an STL file (3D mo
 
 You can enter your own custom text to change the characters used in the ASCII image, and reset them to the default character set: ' .:-+*=%@#'
 
-Future Development:
-
-- [x] Copy ASCII image to clipboard (thanks [donno2048](https://github.com/donno2048)!)
-- [X] Change lighting orientation (thanks [zumatt](https://github.com/zumatt)!)
-- [X] Add screenshot on mobile
-
-Find this project useful? You can buy me a [coffee on Ko-Fi](https://ko-fi.com/andrewsink)!
-
 ![ASCII](https://github.com/user-attachments/assets/009f804a-2852-414b-afe6-7420d161bf43)
