@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta id="ascii" name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+    <title>STL To ASCII Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .slider {
+        appearance: none;
+        background: rgba(55, 65, 81, 0.6);
+        border-radius: 0.25rem;
+        height: 0.25rem;
+      }
+      .slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: #3B82F6;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+      .slider::-moz-range-thumb {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background: #3B82F6;
+        cursor: pointer;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      }
+      .notification {
+        transform: translateX(100%);
+        backdrop-filter: blur(8px);
+      }
+      .notification.show {
+        transform: translateX(0);
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in {
+        animation: fadeIn 0.2s ease-out;
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-900 text-gray-300 font-sans overflow-hidden">
+    <!-- Mobile Controls -->
+    <div class="md:hidden fixed inset-x-0 bottom-0 bg-gray-800 bg-opacity-95 backdrop-blur-sm border-t border-gray-700 z-20 transform translate-y-full transition-transform duration-300" id="mobile-drawer">
+      <!-- Swipe Handle -->
+      <div class="w-12 h-1 bg-gray-500 rounded-full mx-auto mt-2 mb-4"></div>
+      
+      <!-- Mobile Controls Content -->
+      <div class="p-4 space-y-4 max-h-96 overflow-y-auto">
+        <div class="text-center mb-4">
+          <h2 class="text-lg font-bold text-white">STL to ASCII</h2>
+          <p class="text-gray-400 text-sm">Quick Controls</p>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick='document.getElementById("file-selector").click()' 
+            class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+            </svg>
+            Upload
+          </button>
+          <button id="mobile-reset" 
+            class="bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+            Reset
+          </button>
+        </div>
+        
+        <!-- Mobile Sliders -->
+        <div class="space-y-3">
+          <div>
+            <label class="text-sm text-gray-300 mb-1 block">Rotation</label>
+            <input type="range" min="0" max="360" value="45" class="w-full slider" 
+              oninput="updateSliderValue('mobile-rotate', 'mobile-rotate-value', '°')">
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+              <span>0°</span>
+              <span id="mobile-rotate-value" class="text-blue-300">45°</span>
+              <span>360°</span>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm text-gray-300 mb-1 block">Scale</label>
+            <input type="range" min="0.1" max="3" step="0.01" value="1" class="w-full slider" 
+              oninput="updateSliderValue('mobile-scale', 'mobile-scale-value', 'x')">
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+              <span>0.1x</span>
+              <span id="mobile-scale-value" class="text-green-300">1.00x</span>
+              <span>3.0x</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mobile Export -->
+        <div class="grid grid-cols-3 gap-2 pt-2 border-t border-gray-700">
+          <button class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-3 rounded text-sm flex items-center justify-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            Copy
+          </button>
+          <button class="bg-teal-500 hover:bg-teal-600 text-white font-medium py-2 px-3 rounded text-sm flex items-center justify-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Save
+          </button>
+          <button class="bg-pink-500 hover:bg-pink-600 text-white font-medium py-2 px-3 rounded text-sm flex items-center justify-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            Photo
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Mobile Menu Toggle -->
+    <button id="mobile-menu-button" class="md:hidden fixed bottom-4 right-4 z-30 bg-blue-600 hover:bg-blue-700 p-4 rounded-full shadow-lg transition-all duration-200" onclick="toggleMobileDrawer()">
+      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+      </svg>
+    </button>
+
+    <!-- Notification Area -->
+    <div id="notification" class="fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification hidden">
+      <div class="flex items-center gap-2">
+        <svg id="notification-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"></svg>
+        <span id="notification-text" class="text-white font-medium text-sm"></span>
+      </div>
+    </div>
+
+    <div id="ui-container" class="absolute top-0 left-0 p-3 space-y-2 hidden md:block">
+      <div id="controls" class="space-y-3 p-4 bg-gray-800 bg-opacity-40 rounded-lg shadow-lg backdrop-blur-md border border-gray-700 border-opacity-20">
+        <div class="text-center">
+          <h1 class="text-xl font-semibold text-white mb-0.5">STL to ASCII Generator</h1>
+          <p class="text-gray-400 text-xs">Transform 3D models into beautiful ASCII art</p>
+        </div>
+
+        <!-- File and View Controls -->
+        <div class="control-group">
+          <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('file-view')">
+            <h2 class="text-base font-medium text-blue-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"></path>
+              </svg>
+              File & View
+            </h2>
+            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" id="file-view-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          <div id="file-view-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5 space-y-2">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="file-selector" name="files[]" style="display:none" type="file" accept=".stl,.obj,.ply">
+              <div class="relative group flex-1">
+                <button id="input-button" type="button"
+                  class="w-full bg-blue-500 bg-opacity-80 hover:bg-blue-600 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-blue-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+                  onclick='document.getElementById("file-selector").click()'>
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <span class="text-sm" id="upload-text">Upload STL</span>
+                  </span>
+                </button>
+                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
+                  Supports STL, OBJ, PLY formats
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
+                </div>
+              </div>
+              <div class="relative group">
+                <button id="lightDark" type="button"
+                  class="w-full sm:w-auto bg-gray-600 bg-opacity-80 hover:bg-gray-500 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-gray-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-sm">Theme</span>
+                  </span>
+                </button>
+                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
+                  Toggle dark/light mode
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Model Controls -->
+        <div class="control-group">
+          <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('model-controls')">
+            <h2 class="text-base font-medium text-green-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+              </svg>
+              Model Controls
+            </h2>
+            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" id="model-controls-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          <div id="model-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5 space-y-3">
+            <div class="flex flex-wrap gap-1.5">
+              <button id="rotateButton" type="button"
+                class="bg-purple-500 bg-opacity-80 hover:bg-purple-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-purple-400 focus:outline-none backdrop-blur-sm">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  <span class="text-sm">Rotate Model</span>
+                </span>
+              </button>
+              <button id="rotateLightButton" type="button"
+                class="bg-yellow-500 bg-opacity-80 hover:bg-yellow-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-yellow-400 focus:outline-none backdrop-blur-sm">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span class="text-sm">Rotate Light</span>
+                </span>
+              </button>
+              <button id="resetButton" type="button"
+                class="bg-red-500 bg-opacity-80 hover:bg-red-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-red-400 focus:outline-none backdrop-blur-sm">
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                  </svg>
+                  <span class="text-sm">Reset</span>
+                </span>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <label for="lightSlider" class="text-xs font-medium text-gray-300">Light Rotation</label>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-yellow-300 font-mono backdrop-blur-sm" id="lightValue">45°</span>
+                </div>
+                <input id="lightSlider" type="range" min="0" max="360" step="1" value="45" class="w-full slider" oninput="updateSliderValue('lightSlider', 'lightValue', '°')">
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <label for="lightHeightSlider" class="text-xs font-medium text-gray-300">Light Height</label>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-yellow-300 font-mono backdrop-blur-sm" id="lightHeightValue">2.0</span>
+                </div>
+                <input id="lightHeightSlider" type="range" min="-2" max="2" step="0.1" value="2" class="w-full slider" oninput="updateSliderValue('lightHeightSlider', 'lightHeightValue', '')">
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <label for="rotateXSlider" class="text-xs font-medium text-gray-300">Rotate X</label>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateXValue">-90°</span>
+                </div>
+                <input id="rotateXSlider" type="range" min="-180" max="180" step="1" value="-90" class="w-full slider" oninput="updateSliderValue('rotateXSlider', 'rotateXValue', '°')">
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <label for="rotateYSlider" class="text-xs font-medium text-gray-300">Rotate Y</label>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateYValue">0°</span>
+                </div>
+                <input id="rotateYSlider" type="range" min="0" max="360" step="1" value="0" class="w-full slider" oninput="updateSliderValue('rotateYSlider', 'rotateYValue', '°')">
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <label for="rotateZSlider" class="text-xs font-medium text-gray-300">Rotate Z</label>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateZValue">0°</span>
+                </div>
+                <input id="rotateZSlider" type="range" min="0" max="360" step="1" value="0" class="w-full slider" oninput="updateSliderValue('rotateZSlider', 'rotateZValue', '°')">
+              </div>
+              <div class="space-y-1.5">
+                <div class="flex justify-between items-center">
+                  <label for="scaleSlider" class="text-xs font-medium text-gray-300">Scale</label>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-green-300 font-mono backdrop-blur-sm" id="scaleValue">1.00x</span>
+                </div>
+                <input id="scaleSlider" type="range" min="0.1" max="3" step="0.01" value="1" class="w-full slider" oninput="updateSliderValue('scaleSlider', 'scaleValue', 'x')">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ASCII Controls -->
+        <div class="control-group">
+          <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('ascii-controls')">
+            <h2 class="text-base font-medium text-purple-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+              ASCII Controls
+            </h2>
+            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" id="ascii-controls-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          <div id="ascii-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <div class="flex-1">
+                <label for="newASCII" class="block text-xs font-medium text-gray-300 mb-1.5">ASCII Character Set</label>
+                <input id="newASCII" value="Custom Text"
+                  class="w-full bg-gray-600 bg-opacity-70 border border-gray-500 border-opacity-50 rounded-md px-2.5 py-1.5 text-white text-sm focus:ring-1 focus:ring-purple-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm">
+              </div>
+              <div class="flex gap-1.5 sm:flex-col sm:justify-end">
+                <button id="updateASCII" type="button"
+                  class="bg-green-500 bg-opacity-80 hover:bg-green-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-green-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    <span class="text-sm">Update</span>
+                  </span>
+                </button>
+                <button id="resetASCII" type="button"
+                  class="bg-red-500 bg-opacity-80 hover:bg-red-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-red-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    Reset
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Controls -->
+        <div class="control-group">
+          <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('export-controls')">
+            <h2 class="text-base font-medium text-orange-300 flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+              </svg>
+              Export & Share
+            </h2>
+            <svg class="w-3.5 h-3.5 transform transition-transform duration-200" id="export-controls-icon" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          <div id="export-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div class="relative group">
+                <button id="clipboardASCII" type="button"
+                  class="w-full bg-indigo-500 bg-opacity-80 hover:bg-indigo-600 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-indigo-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                    </svg>
+                    <span class="text-sm">Copy</span>
+                  </span>
+                </button>
+                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
+                  Copy ASCII to clipboard
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
+                </div>
+              </div>
+              <div class="relative group">
+                <button id="copyASCII" type="button"
+                  class="w-full bg-teal-500 bg-opacity-80 hover:bg-teal-600 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-teal-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-sm">Download</span>
+                  </span>
+                </button>
+                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
+                  Download as text file
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
+                </div>
+              </div>
+              <div class="relative group">
+                <button id="screenshotButton" type="button"
+                  class="w-full bg-pink-500 bg-opacity-80 hover:bg-pink-600 hover:bg-pink-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-pink-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    <span class="text-sm">Screenshot</span>
+                  </span>
+                </button>
+                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
+                  Capture screenshot
+                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/effects/AsciiEffect.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+    
+    <script>
+      // Mobile Drawer Functionality
+      function toggleMobileDrawer() {
+        const drawer = document.getElementById('mobile-drawer');
+        const isOpen = drawer.style.transform === 'translateY(0px)' || drawer.classList.contains('translate-y-0');
+        
+        if (isOpen) {
+          drawer.style.transform = 'translateY(100%)';
+          drawer.classList.remove('translate-y-0');
+        } else {
+          drawer.style.transform = 'translateY(0px)';
+          drawer.classList.add('translate-y-0');
+        }
+      }
+
+      // Enhanced UI Functionality
+      function toggleSection(sectionId) {
+        const content = document.getElementById(sectionId + '-content');
+        const icon = document.getElementById(sectionId + '-icon');
+        
+        if (content.style.display === 'none' || !content.style.display) {
+          content.style.display = 'block';
+          content.classList.add('fade-in');
+          icon.style.transform = 'rotate(180deg)';
+        } else {
+          content.style.display = 'none';
+          icon.style.transform = 'rotate(0deg)';
+        }
+      }
+      
+      function updateSliderValue(sliderId, valueId, suffix) {
+        const slider = document.getElementById(sliderId);
+        const valueDisplay = document.getElementById(valueId);
+        let value = parseFloat(slider.value);
+        
+        if (suffix === '°') {
+          valueDisplay.textContent = Math.round(value) + '°';
+        } else if (suffix === 'x') {
+          valueDisplay.textContent = value.toFixed(2) + 'x';
+        } else {
+          valueDisplay.textContent = value.toFixed(1);
+        }
+      }
+      
+      function showNotification(message, type = 'success') {
+        const notification = document.getElementById('notification');
+        const icon = document.getElementById('notification-icon');
+        const text = document.getElementById('notification-text');
+        
+        // Set icon and colors based on type
+        if (type === 'success') {
+          notification.className = 'fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification bg-green-600 bg-opacity-90 backdrop-blur-md';
+          icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>';
+        } else if (type === 'error') {
+          notification.className = 'fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification bg-red-600 bg-opacity-90 backdrop-blur-md';
+          icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>';
+        } else {
+          notification.className = 'fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification bg-blue-600 bg-opacity-90 backdrop-blur-md';
+          icon.innerHTML = '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>';
+        }
+        
+        text.textContent = message;
+        notification.classList.remove('hidden');
+        notification.classList.add('show');
+        
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            notification.classList.add('hidden');
+          }, 300);
+        }, 3000);
+      }
+      
+      function setButtonLoading(buttonId, isLoading) {
+        const button = document.getElementById(buttonId);
+        const originalHTML = button.innerHTML;
+        
+        if (isLoading) {
+          button.disabled = true;
+          button.innerHTML = `<svg class="animate-spin h-4 w-4 mx-auto" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+        } else {
+          button.disabled = false;
+          button.innerHTML = originalHTML;
+        }
+      }
+      
+      // Initialize sections (all collapsed by default except first)
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all sections as expanded
+        const sections = ['file-view', 'model-controls', 'ascii-controls', 'export-controls'];
+        sections.forEach(section => {
+          const content = document.getElementById(section + '-content');
+          const icon = document.getElementById(section + '-icon');
+          content.style.display = 'block';
+          icon.style.transform = 'rotate(180deg)';
+        });
+        
+        // Enhance file upload with drag and drop
+        const fileSelector = document.getElementById('file-selector');
+        const uploadButton = document.getElementById('input-button');
+        
+        // Add drag and drop to entire UI container
+        const uiContainer = document.getElementById('ui-container');
+        uiContainer.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          uiContainer.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+        });
+        
+        uiContainer.addEventListener('dragleave', (e) => {
+          e.preventDefault();
+          uiContainer.style.backgroundColor = '';
+        });
+        
+        uiContainer.addEventListener('drop', (e) => {
+          e.preventDefault();
+          uiContainer.style.backgroundColor = '';
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            fileSelector.files = files;
+            showNotification('File uploaded successfully!');
+          }
+        });
+        
+        // Enhanced button interactions
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(button => {
+          if (button.id && !button.onclick && !button.getAttribute('onclick')) {
+            button.addEventListener('click', () => {
+              // Add subtle click animation
+              button.style.transform = 'scale(0.95)';
+              setTimeout(() => {
+                button.style.transform = 'scale(1)';
+              }, 100);
+            });
+          }
+        });
+      });
+    </script>
+    
+    <script src="script.js"></script>
+  </body>
+
+</html>
