@@ -183,7 +183,7 @@ function openFile(event) {
             // Set up new mesh
             myMesh.geometry = geometry;
             myMesh.material = material;
-            myMesh.rotation.set(-75 * Math.PI / 180, 0, 0);
+            myMesh.rotation.set(-60 * Math.PI / 180, 0, 0);
             myMesh.scale.setScalar(2.0);
             
             scene.add(myMesh);
@@ -386,7 +386,7 @@ function resetPositions() {
             const slider = cacheElement(id);
             if (slider) {
                 slider.value = id === 'lightSlider' ? 120 : 
-                              id === 'rotateXSlider' ? -75 : 
+                              id === 'rotateXSlider' ? -60 : 
                               id === 'scaleSlider' ? 2.0 : 
                               id === 'lightHeightSlider' ? 2 : 0;
                 slider.dispatchEvent(new Event('input'));
