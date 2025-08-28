@@ -54,7 +54,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .text-xs{font-size:0.75rem;line-height:1rem}.text-sm{font-size:0.875rem;line-height:1.25rem}
 .text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-xl{font-size:1.25rem;line-height:1.75rem}
 .font-medium{font-weight:500}.font-semibold{font-weight:600}.font-bold{font-weight:700}
-.text-white{color:white}.text-gray-300{color:#d1d5db}.text-gray-400{color:#9ca3af}
+.text-black{color:black}.text-white{color:white}.text-gray-300{color:#d1d5db}.text-gray-400{color:#9ca3af}
 .text-blue-300{color:#93c5fd}.text-green-300{color:#86efac}.text-purple-300{color:#d8b4fe}.text-yellow-300{color:#fde047}
 .text-center{text-align:center}.font-mono{font-family:ui-monospace,monospace}
 
