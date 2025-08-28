@@ -1,104 +1,53 @@
-// Theme Mode: true = Dark (white on black), false = Light (black on white)
-let themeMode = true
+// ASCII 3D Modeler - Optimized Script
+let themeMode = true;
+let isModelRotating = false;
+let isLightRotating = false;
 
-//Create a clock for rotation
-const clock = new THREE.Clock()
+// Cache DOM elements
+const elements = {};
+const cacheElement = (id) => elements[id] || (elements[id] = document.getElementById(id));
 
-// Set rotate boolean variable
-let isModelRotating = false
-let isLightRotating = false
-
-// Detect mobile device and enable light rotation by default
+// Performance optimization
+let animationId;
+const clock = new THREE.Clock();
 const isMobileDevice = /(Mobi|Android|iPhone|iPad|iPod|Mobile)/i.test(navigator.userAgent) || window.innerWidth <= 768;
-if (isMobileDevice) {
-    isLightRotating = true;
-}
 
-// Update the Rotate Light button to reflect current state
-function updateRotateLightButtonUI() {
-    const btn = document.getElementById('isLightRotatingButton');
-    if (!btn) return;
-    // Remove existing color classes
-    btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-yellow-600', 'hover:bg-yellow-700', 'bg-gray-600', 'hover:bg-gray-700');
+// Initialize mobile auto-rotation
+if (isMobileDevice) isLightRotating = true;
 
-    if (isLightRotating) {
-        btn.textContent = 'Pause Light';
-        btn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
-    } else {
-        btn.textContent = 'Rotate Light';
-        btn.classList.add('bg-green-600', 'hover:bg-green-700');
-    }
-}
-
-// Initialize button state on load
-updateRotateLightButtonUI();
-
-// Update the Rotate Model button to reflect current state
-function updateRotateModelButtonUI() {
-    const btn = document.getElementById('rotateButton');
-    if (!btn) return;
-    // Remove existing color classes
-    btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-yellow-600', 'hover:bg-yellow-700', 'bg-gray-600', 'hover:bg-gray-700');
-
-    if (isModelRotating) {
-        btn.textContent = 'Pause Rotate';
-        btn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
-    } else {
-        btn.textContent = 'Rotate Model';
-        btn.classList.add('bg-green-600', 'hover:bg-green-700');
-    }
-}
-
-updateRotateModelButtonUI();
-
-
-//Ugh, don't ask about this stuff
-var userUploaded = false
-let controls
-
-// Creates empty mesh container
+// Core variables
+let userUploaded = false;
+let controls;
 const myMesh = new THREE.Mesh();
-
-// Scene
-const scene = new THREE.Scene()
+const scene = new THREE.Scene();
 scene.background = new THREE.Color(0, 0, 0);
 
-//Lights
+// Lighting
 const pointLight1 = new THREE.PointLight(0xffffff, 1, 0, 0);
 pointLight1.position.set(100, 100, 400);
 scene.add(pointLight1);
 
-// const pointLight2 = new THREE.PointLight(0xffffff, .1);
-// pointLight2.position.set(0, -50, 0); // Fill light on opposite side
-// scene.add(pointLight2);
-
-// Parameters
-const stlLoader = new THREE.STLLoader()
-
-//Material
-const material = new THREE.MeshStandardMaterial()
-material.flatShading = true
-material.side = THREE.DoubleSide;
-
-// Sizes
-const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight
-}
-
-// Camera
-const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 2000)
-
-// Renderer
-const renderer = new THREE.WebGLRenderer()
+// Setup
+const stlLoader = new THREE.STLLoader();
+const material = new THREE.MeshStandardMaterial({ flatShading: true, side: THREE.DoubleSide });
+const sizes = { width: window.innerWidth, height: window.innerHeight };
+const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 2000);
+const renderer = new THREE.WebGLRenderer();
 
 let effect;
+let characters = ' .:-+*=%@#';
+const effectSize = { amount: .205 };
+let backgroundColor = 'black';
+let ASCIIColor = 'white';
 
-let characters = ' .:-+*=%@#'
-const effectSize = { amount: .205 }
-let backgroundColor = 'black'
-let ASCIIColor = 'white'
+// ASCII patterns
+const asciiPatterns = {
+    classic: ' .:-+*=%@#',
+    blocks: ' .:-=*#@',
+    custom: 'Custom Text'
+};
 
+// Optimized effect creation
 function createEffect() {
     effect = new THREE.AsciiEffect(renderer, characters, { invert: true, resolution: effectSize.amount });
     effect.setSize(sizes.width, sizes.height);
@@ -106,369 +55,317 @@ function createEffect() {
     effect.domElement.style.backgroundColor = backgroundColor;
 }
 
-// Create and configure orbit controls
+// Optimized controls creation
 function createOrbitControls() {
-    controls = new THREE.OrbitControls(camera, effect.domElement)
-
-    // Configure orbit controls for smoother interaction
-    controls.enableDamping = true; // Add smooth damping
-    controls.dampingFactor = 0.05; // Lower = smoother
+    controls = new THREE.OrbitControls(camera, effect.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
     controls.enableZoom = true;
-    controls.enablePan = true;
-    controls.enableRotate = true;
-    controls.rotateSpeed = 0.5; // Slower rotation for smoother feel
-    controls.zoomSpeed = 0.8; // Slightly slower zoom
-    controls.panSpeed = 0.8; // Slightly slower pan
+}
 
-    // Configure mouse button controls
-    controls.mouseButtons = {
-        LEFT: THREE.MOUSE.ROTATE,
-        MIDDLE: THREE.MOUSE.PAN,
-        RIGHT: THREE.MOUSE.ROTATE
+// Debounced resize handler
+let resizeTimeout;
+function onWindowResize() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        effect.setSize(window.innerWidth, window.innerHeight);
+    }, 100);
+}
+
+// Optimized button UI updates
+function updateButtonUI(buttonId, isActive, activeText, inactiveText) {
+    const btn = cacheElement(buttonId);
+    if (!btn) return;
+    
+    btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-yellow-600', 'hover:bg-yellow-700');
+    if (isActive) {
+        btn.textContent = activeText;
+        btn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
+    } else {
+        btn.textContent = inactiveText;
+        btn.classList.add('bg-green-600', 'hover:bg-green-700');
     }
 }
 
-createEffect()
+// Consolidated effect recreation
+function recreateEffect() {
+    if (effect?.domElement?.parentNode) {
+        document.body.removeChild(effect.domElement);
+    }
+    createEffect();
+    onWindowResize();
+    document.body.appendChild(effect.domElement);
+    createOrbitControls();
+}
 
-document.body.appendChild(effect.domElement)
+// Optimized character update
+function updateCharacters(newChars) {
+    if (!newChars || newChars.trim().length === 0) {
+        newChars = ' .:-+*=%@#';
+    }
+    if (newChars.charAt(0) !== ' ') {
+        newChars = ' ' + newChars;
+    }
+    characters = newChars;
+    recreateEffect();
+}
 
+// File handling
+function openFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
 
-stlLoader.load(
-    './models/skull_mesh.stl',
-    function (geometry) {
-
-        myMesh.material = material;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        userUploaded = true;
+        const geometry = stlLoader.parse(e.target.result);
+        geometry.computeBoundingBox();
+        
+        const center = geometry.boundingBox.getCenter(new THREE.Vector3());
+        geometry.translate(-center.x, -center.y, -center.z);
+        
         myMesh.geometry = geometry;
-
-        var tempGeometry = new THREE.Mesh(geometry, material)
-        myMesh.position.copy = (tempGeometry.position)
-
-        geometry.computeVertexNormals();
-        myMesh.geometry.center()
-
-        myMesh.geometry.computeBoundingBox();
-
-        resetPositions();
-
-        var bbox = myMesh.geometry.boundingBox;
-
-        myMesh.position.y = ((bbox.max.z - bbox.min.z) / 5)
-
-        camera.position.x = ((bbox.max.x * 4));
-        camera.position.y = ((bbox.max.y));
-        camera.position.z = ((bbox.max.z * 3));
-
+        myMesh.material = material;
+        myMesh.rotation.set(-75 * Math.PI / 180, 0, 0);
+        myMesh.scale.setScalar(1.2);
+        
         scene.add(myMesh);
-
-        createOrbitControls()
-
-
+        createOrbitControls();
+        
+        cacheElement('upload-text').textContent = file.name;
+        
+        // Animation loop
         function tick() {
-            if (isModelRotating) {
-                myMesh.rotation.z += 0.01; // Adjust speed as needed
-            }
-
+            if (isModelRotating) myMesh.rotation.z += 0.01;
             if (isLightRotating) {
-                const lightSlider = document.getElementById('lightSlider');
-                let currentAngle = parseFloat(lightSlider.value);
-                currentAngle = (currentAngle + 1) % 360;
+                const lightSlider = cacheElement('lightSlider');
+                let currentAngle = (parseFloat(lightSlider.value) + 1) % 360;
                 lightSlider.value = currentAngle;
-                // Manually trigger the input event to update the light's position
                 lightSlider.dispatchEvent(new Event('input'));
             }
-
-            // Update controls for smooth damping
             controls.update();
-
-            render()
-            window.requestAnimationFrame(tick)
-        }
-
-        function render() {
             effect.render(scene, camera);
+            animationId = requestAnimationFrame(tick);
         }
+        tick();
+    };
+    reader.readAsArrayBuffer(file);
+}
 
-        tick()
+// Initialize
+createEffect();
+camera.position.set(100, 100, 400);
+document.body.appendChild(effect.domElement);
 
-        document.getElementById('file-selector').addEventListener('change', openFile, false);
+// Load default model
+stlLoader.load('./models/skull_mesh.stl', (geometry) => {
+    openFile({ target: { files: [{ name: 'skull_mesh.stl' }] } });
+});
 
+// Event handlers
+window.addEventListener('resize', onWindowResize);
 
-        function openFile(evt) {
-            const fileObject = evt.target.files[0];
-
-            const reader = new FileReader();
-            reader.readAsArrayBuffer(fileObject);
-            reader.onload = function () {
-                if (userUploaded == false) {
-                    userUploaded = true;
-                }
-                const geometry = stlLoader.parse(this.result);
-                tempGeometry = geometry;
-                myMesh.geometry = geometry;
-                myMesh.geometry.center()
-                myMesh.geometry.computeBoundingBox();
-                resetPositions();
-
-                var bbox = myMesh.geometry.boundingBox;
-
-                // camera.position.x = ((bbox.max.x * 4));
-                // camera.position.y = ((bbox.max.y));
-                // camera.position.z = ((bbox.max.z * 3));
-
-                myMesh.position.y = ((bbox.max.z - bbox.min.z) / 6)
-
-                scene.add(myMesh);
-            };
-        };
+// Export functions
+const exportFunctions = {
+    copyASCII: () => {
+        const text = document.getElementsByTagName("table")[0]?.innerText || '';
+        download('ASCII.txt', text);
+    },
+    clipboardASCII: () => {
+        const textArea = document.createElement("textarea");
+        textArea.textContent = document.getElementsByTagName("td")[0]?.innerText || '';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert("ASCII copied to clipboard");
     }
-)
+};
 
+// Batch DOM event listeners for performance
+const eventHandlers = {
+    'file-selector': ['change', openFile, false],
+    'screenshotButton': ['click', takeScreenshot],
+    'updateASCII': ['click', () => updateCharacters(cacheElement('newASCII').value)],
+    'resetASCII': ['click', () => updateCharacters(' .:-+*=%@#')],
+    'copyASCII': ['click', exportFunctions.copyASCII],
+    'clipboardASCII': ['click', exportFunctions.clipboardASCII],
+    'lightDark': ['click', () => {
+        themeMode = !themeMode;
+        backgroundColor = themeMode ? 'black' : 'white';
+        ASCIIColor = themeMode ? 'white' : 'black';
+        if (effect?.domElement) {
+            effect.domElement.style.color = ASCIIColor;
+            effect.domElement.style.backgroundColor = backgroundColor;
+        }
+    }],
+    'rotateButton': ['click', () => {
+        isModelRotating = !isModelRotating;
+        updateButtonUI('rotateButton', isModelRotating, 'Pause Rotate', 'Rotate Model');
+    }],
+    'rotateLightButton': ['click', () => {
+        isLightRotating = !isLightRotating;
+        updateButtonUI('rotateLightButton', isLightRotating, 'Pause Light', 'Rotate Light');
+    }],
+    'resetButton': ['click', resetPositions],
+    'mobile-menu-button': ['click', () => cacheElement('ui-container').classList.toggle('hidden')],
+    'mobile-upload': ['click', () => cacheElement('file-selector').click()],
+    'patternSelect': ['change', function() {
+        const customInput = cacheElement('newASCII');
+        if (this.value === 'custom') {
+            customInput.disabled = false;
+            customInput.focus();
+        } else {
+            customInput.disabled = true;
+            customInput.value = asciiPatterns[this.value];
+            updateCharacters(asciiPatterns[this.value]);
+        }
+    }]
+};
 
-document.getElementById('screenshotButton').addEventListener('click', takeScreenshot);
+// Apply all event listeners efficiently
+Object.entries(eventHandlers).forEach(([id, [event, handler, useCapture]]) => {
+    const element = cacheElement(id);
+    if (element) element.addEventListener(event, handler, useCapture);
+});
 
+// Debounced slider handlers
+const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+};
+
+// Optimized slider handling
+['lightSlider', 'lightHeightSlider', 'scaleSlider'].forEach(id => {
+    const element = cacheElement(id);
+    if (element) {
+        element.addEventListener('input', debounce((e) => {
+            const value = parseFloat(e.target.value);
+            if (id === 'scaleSlider') {
+                myMesh.scale.setScalar(value);
+            } else if (id === 'lightSlider') {
+                const angle = value * Math.PI / 180;
+                pointLight1.position.set(Math.cos(angle) * 100, 100, Math.sin(angle) * 100);
+            } else if (id === 'lightHeightSlider') {
+                pointLight1.position.y = value * 50 + 100;
+            }
+        }, 16));
+    }
+});
+
+// Rotation sliders
+['X', 'Y', 'Z'].forEach(axis => {
+    const element = cacheElement(`rotate${axis}Slider`);
+    if (element) {
+        element.addEventListener('input', debounce((e) => {
+            const value = parseFloat(e.target.value) * Math.PI / 180;
+            myMesh.rotation[axis.toLowerCase()] = axis === 'X' ? value : value;
+        }, 16));
+    }
+});
+
+// Utility functions
 function takeScreenshot() {
-    // Capture only the ASCII canvas, not the entire page
-    html2canvas(effect.domElement).then(function (canvas) {
-        var link = document.createElement("a");
-        document.body.appendChild(link);
-        link.download = "ASCII.jpg";
-        link.href = canvas.toDataURL("image/jpg");
-        console.log(link.href);
-        // link.target = '_blank';
+    html2canvas(document.body).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'ASCII_3D_Screenshot.png';
+        link.href = canvas.toDataURL();
         link.click();
     });
 }
 
-document.getElementById('updateASCII').addEventListener('click', updateASCII);
-
-function updateASCII() {
-    if (effect && effect.domElement) {
-        document.body.removeChild(effect.domElement)
-    }
-
-    let customChars = document.getElementById('newASCII').value;
+function resetPositions() {
+    if (!myMesh.geometry) return;
     
-    // Ensure first character is always a space for proper background
-    if (customChars.length > 0 && customChars.charAt(0) !== ' ') {
-        customChars = ' ' + customChars;
-    }
+    ['lightSlider', 'lightHeightSlider', 'rotateXSlider', 'rotateYSlider', 'rotateZSlider', 'scaleSlider']
+        .forEach(id => {
+            const slider = cacheElement(id);
+            if (slider) {
+                slider.value = id === 'lightSlider' ? 120 : 
+                              id === 'rotateXSlider' ? -75 : 
+                              id === 'scaleSlider' ? 1.2 : 
+                              id === 'lightHeightSlider' ? 2 : 0;
+                slider.dispatchEvent(new Event('input'));
+            }
+        });
     
-    // Fallback to classic if empty
-    if (customChars.trim().length === 0) {
-        customChars = ' .:-+*=%@#';
-    }
-    
-    characters = customChars;
-
-    createEffect()
-    onWindowResize()
-
-    document.body.appendChild(effect.domElement)
-
-    createOrbitControls()
+    isModelRotating = false;
+    isLightRotating = isMobileDevice;
+    updateButtonUI('rotateButton', isModelRotating, 'Pause Rotate', 'Rotate Model');
+    updateButtonUI('rotateLightButton', isLightRotating, 'Pause Light', 'Rotate Light');
 }
 
-document.getElementById('resetASCII').addEventListener('click', resetASCII);
-
-function resetASCII() {
-
-    document.body.removeChild(effect.domElement)
-
-    characters = ' .:-+*=%@#'
-
-    createEffect()
-    onWindowResize()
-
-    document.body.appendChild(effect.domElement)
-
-    createOrbitControls()
-}
-
-document.getElementById('lightDark').addEventListener('click', lightDark);
-
-function lightDark() {
-    themeMode = !themeMode;
-    document.body.classList.toggle('light-mode', !themeMode);
-
-    if (themeMode) {
-        backgroundColor = 'black';
-        ASCIIColor = 'white';
+// Missing utility functions
+function toggleMobileDrawer() {
+    const drawer = cacheElement('mobile-drawer');
+    const isOpen = drawer.style.transform === 'translateY(0px)' || drawer.classList.contains('translate-y-0');
+    
+    if (isOpen) {
+        drawer.style.transform = 'translateY(100%)';
+        drawer.classList.remove('translate-y-0');
     } else {
-        backgroundColor = 'white';
-        ASCIIColor = 'black';
+        drawer.style.transform = 'translateY(0px)';
+        drawer.classList.add('translate-y-0');
     }
-
-    effect.domElement.style.color = ASCIIColor;
-    effect.domElement.style.backgroundColor = backgroundColor;
 }
 
-document.getElementById('lightSlider').addEventListener('input', function (e) {
-    const angleDeg = parseFloat(e.target.value);
-    const angleRad = angleDeg * Math.PI / 180;
-    const radius = myMesh.geometry.boundingBox.max.z * 2; // Distance from origin, similar to initial position
-
-    // Get height from the height slider
-    const heightSlider = document.getElementById('lightHeightSlider');
-    const heightMultiplier = parseFloat(heightSlider.value);
-
-    // Calculate height based on bounding box
-    let height = 85; // Default height
-    if (myMesh.geometry.boundingBox) {
-        const bbox = myMesh.geometry.boundingBox;
-        const bboxHeight = bbox.max.y - bbox.min.y;
-        height = bboxHeight * heightMultiplier;
+function toggleSection(sectionId) {
+    const content = cacheElement(sectionId + '-content');
+    const icon = cacheElement(sectionId + '-icon');
+    
+    if (content.style.display === 'none' || !content.style.display) {
+        content.style.display = 'block';
+        content.classList.add('fade-in');
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        content.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
     }
+}
 
-    // Calculate new position in XZ plane
-    const x = Math.cos(angleRad) * radius;
-    const z = Math.sin(angleRad) * radius;
-    pointLight1.position.set(x, height, z);
-    // pointLight2.position.set(-x, -y, -z);
-});
-
-document.getElementById('lightHeightSlider').addEventListener('input', function (e) {
-    // Trigger the light slider to update position with new height
-    document.getElementById('lightSlider').dispatchEvent(new Event('input'));
-});
-
-
-
-window.addEventListener('resize', onWindowResize);
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    effect.setSize(window.innerWidth, window.innerHeight);
+function updateSliderValue(sliderId, valueId, suffix) {
+    const slider = cacheElement(sliderId);
+    const valueDisplay = cacheElement(valueId);
+    if (!slider || !valueDisplay) return;
+    
+    const value = parseFloat(slider.value);
+    valueDisplay.textContent = suffix === '°' ? Math.round(value) + '°' : 
+                              suffix === 'x' ? value.toFixed(2) + 'x' : 
+                              value.toFixed(1);
 }
 
 function download(filename, text) {
-    var element = document.createElement('a');
+    const element = document.createElement('a');
     element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);
-
     element.style.display = 'none';
     document.body.appendChild(element);
-
     element.click();
-
     document.body.removeChild(element);
 }
 
-document.getElementById("copyASCII").addEventListener("click", function () {
-    var text = document.getElementsByTagName("table")[0].innerText
-    var filename = "ASCII.txt";
+// Initialize button states
+updateButtonUI('rotateButton', isModelRotating, 'Pause Rotate', 'Rotate Model');
+updateButtonUI('rotateLightButton', isLightRotating, 'Pause Light', 'Rotate Light');
 
-    download(filename, text);
-}, false);
-
-document.getElementById("clipboardASCII").addEventListener("click", function () {
-    const textArea = document.createElement("textarea");
-    textArea.textContent = document.getElementsByTagName("td")[0].innerText;
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    window.alert("ASCII copied to clipboard");
-}, false);
-
-document.getElementById('scaleSlider').addEventListener('input', function (e) {
-    const scale = parseFloat(e.target.value);
-    myMesh.scale.set(scale, scale, scale);
-});
-
-// Rotation sliders logic
-['X', 'Y', 'Z'].forEach(axis => {
-    document.getElementById(`rotate${axis}Slider`).addEventListener('input', function (e) {
-        const value = parseFloat(e.target.value) * Math.PI / 180;
-        if (axis === 'X') {
-            // Account for initial -90° position
-            myMesh.rotation.x = value;
-        } else {
-            myMesh.rotation[axis.toLowerCase()] = value;
+// Initialize sections as expanded
+document.addEventListener('DOMContentLoaded', () => {
+    ['file-view', 'model-controls', 'ascii-controls', 'export-controls'].forEach(section => {
+        const content = cacheElement(section + '-content');
+        const icon = cacheElement(section + '-icon');
+        if (content && icon) {
+            content.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
         }
     });
-});
-
-document.getElementById('rotateButton').addEventListener('click', function () {
-    isModelRotating = !isModelRotating;
-    updateRotateModelButtonUI();
-});
-
-document.getElementById('rotateLightButton').addEventListener('click', function () {
-    isLightRotating = !isLightRotating;
-    updateRotateLightButtonUI();
-});
-
-document.getElementById('resetButton').addEventListener('click', resetPositions);
-
-function resetPositions() {
-    // Reset model rotation and scale
-    myMesh.scale.set(1, 1, 1);
-    myMesh.rotation.set(-90 * Math.PI / 180, 0, 0);
-
-    // Reset sliders to initial model position
-    document.getElementById('scaleSlider').value = 1;
-    document.getElementById('rotateXSlider').value = -90;
-    document.getElementById('rotateYSlider').value = 0;
-    document.getElementById('rotateZSlider').value = 0;
-    document.getElementById('lightSlider').value = 45;
-    document.getElementById('lightHeightSlider').value = 2;
-
-    // Reset light position
-    if (myMesh.geometry.boundingBox) {
-        document.getElementById('lightSlider').dispatchEvent(new Event('input'));
-    }
-
-
-    // Stop rotations
-    isModelRotating = false;
-    isLightRotating = isMobileDevice;
-    updateRotateLightButtonUI();
-    updateRotateModelButtonUI();
-}
-
-document.getElementById('mobile-menu-button').addEventListener('click', function () {
-    document.getElementById('ui-container').classList.toggle('hidden');
-});
-
-// ASCII Pattern definitions
-const asciiPatterns = {
-    classic: ' .:-+*=%@#',
-    blocks: ' .:-=*#@',
-    custom: 'Custom Text'
-};
-
-// Pattern selector functionality
-document.getElementById('patternSelect').addEventListener('change', function() {
-    const selectedPattern = this.value;
-    const customInput = document.getElementById('newASCII');
-    
-    if (selectedPattern === 'custom') {
-        customInput.disabled = false;
-        customInput.focus();
-    } else {
-        customInput.disabled = true;
-        customInput.value = asciiPatterns[selectedPattern];
-        
-        // Update the actual characters and effect  
-        let newChars = asciiPatterns[selectedPattern];
-        
-        // Ensure first character is always a space for proper background
-        if (newChars.length > 0 && newChars.charAt(0) !== ' ') {
-            newChars = ' ' + newChars;
-        }
-        
-        characters = newChars;
-        
-        // Recreate the effect with new characters
-        if (effect && effect.domElement) {
-            document.body.removeChild(effect.domElement);
-            createEffect();
-            onWindowResize();
-            document.body.appendChild(effect.domElement);
-            createOrbitControls();
-        }
-    }
 });
