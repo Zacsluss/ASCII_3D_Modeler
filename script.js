@@ -1,27 +1,27 @@
 // Theme Mode: true = Dark (white on black), false = Light (black on white)
-let isDarkMode = true
+let themeMode = true
 
 //Create a clock for rotation
 const clock = new THREE.Clock()
 
 // Set rotate boolean variable
-let rotateModel = false
-let rotateLight = false
+let isModelRotating = false
+let isLightRotating = false
 
 // Detect mobile device and enable light rotation by default
 const isMobileDevice = /(Mobi|Android|iPhone|iPad|iPod|Mobile)/i.test(navigator.userAgent) || window.innerWidth <= 768;
 if (isMobileDevice) {
-    rotateLight = true;
+    isLightRotating = true;
 }
 
 // Update the Rotate Light button to reflect current state
 function updateRotateLightButtonUI() {
-    const btn = document.getElementById('rotateLightButton');
+    const btn = document.getElementById('isLightRotatingButton');
     if (!btn) return;
     // Remove existing color classes
     btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-yellow-600', 'hover:bg-yellow-700', 'bg-gray-600', 'hover:bg-gray-700');
 
-    if (rotateLight) {
+    if (isLightRotating) {
         btn.textContent = 'Pause Light';
         btn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
     } else {
@@ -40,7 +40,7 @@ function updateRotateModelButtonUI() {
     // Remove existing color classes
     btn.classList.remove('bg-green-600', 'hover:bg-green-700', 'bg-yellow-600', 'hover:bg-yellow-700', 'bg-gray-600', 'hover:bg-gray-700');
 
-    if (rotateModel) {
+    if (isModelRotating) {
         btn.textContent = 'Pause Rotate';
         btn.classList.add('bg-yellow-600', 'hover:bg-yellow-700');
     } else {
@@ -164,11 +164,11 @@ stlLoader.load(
 
 
         function tick() {
-            if (rotateModel) {
+            if (isModelRotating) {
                 myMesh.rotation.z += 0.01; // Adjust speed as needed
             }
 
-            if (rotateLight) {
+            if (isLightRotating) {
                 const lightSlider = document.getElementById('lightSlider');
                 let currentAngle = parseFloat(lightSlider.value);
                 currentAngle = (currentAngle + 1) % 360;
@@ -242,10 +242,11 @@ function takeScreenshot() {
 document.getElementById('updateASCII').addEventListener('click', updateASCII);
 
 function updateASCII() {
+    if (effect && effect.domElement) {
+        document.body.removeChild(effect.domElement)
+    }
 
-    document.body.removeChild(effect.domElement)
-
-    characters = " " + "." + document.getElementById('newASCII').value;
+    characters = document.getElementById('newASCII').value;
 
     createEffect()
     onWindowResize()
@@ -253,7 +254,6 @@ function updateASCII() {
     document.body.appendChild(effect.domElement)
 
     createOrbitControls()
-
 }
 
 document.getElementById('resetASCII').addEventListener('click', resetASCII);
@@ -275,10 +275,10 @@ function resetASCII() {
 document.getElementById('lightDark').addEventListener('click', lightDark);
 
 function lightDark() {
-    isDarkMode = !isDarkMode;
-    document.body.classList.toggle('light-mode', !isDarkMode);
+    themeMode = !themeMode;
+    document.body.classList.toggle('light-mode', !themeMode);
 
-    if (isDarkMode) {
+    if (themeMode) {
         backgroundColor = 'black';
         ASCIIColor = 'white';
     } else {
@@ -380,12 +380,12 @@ document.getElementById('scaleSlider').addEventListener('input', function (e) {
 });
 
 document.getElementById('rotateButton').addEventListener('click', function () {
-    rotateModel = !rotateModel;
+    isModelRotating = !isModelRotating;
     updateRotateModelButtonUI();
 });
 
 document.getElementById('rotateLightButton').addEventListener('click', function () {
-    rotateLight = !rotateLight;
+    isLightRotating = !isLightRotating;
     updateRotateLightButtonUI();
 });
 
@@ -411,12 +411,45 @@ function resetPositions() {
 
 
     // Stop rotations
-    rotateModel = false;
-    rotateLight = isMobileDevice;
+    isModelRotating = false;
+    isLightRotating = isMobileDevice;
     updateRotateLightButtonUI();
     updateRotateModelButtonUI();
 }
 
 document.getElementById('mobile-menu-button').addEventListener('click', function () {
     document.getElementById('ui-container').classList.toggle('hidden');
+});
+
+// ASCII Pattern definitions
+const asciiPatterns = {
+    classic: ' .:-+*=%@#',
+    blocks: ' .:-=*#@',
+    custom: 'Custom Text'
+};
+
+// Pattern selector functionality
+document.getElementById('patternSelect').addEventListener('change', function() {
+    const selectedPattern = this.value;
+    const customInput = document.getElementById('newASCII');
+    
+    if (selectedPattern === 'custom') {
+        customInput.disabled = false;
+        customInput.focus();
+    } else {
+        customInput.disabled = true;
+        customInput.value = asciiPatterns[selectedPattern];
+        
+        // Update the actual characters and effect
+        characters = asciiPatterns[selectedPattern];
+        
+        // Recreate the effect with new characters
+        if (effect && effect.domElement) {
+            document.body.removeChild(effect.domElement);
+            createEffect();
+            onWindowResize();
+            document.body.appendChild(effect.domElement);
+            createOrbitControls();
+        }
+    }
 });

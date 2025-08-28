@@ -1,6 +1,9 @@
 MIT License
 
-Copyright (c) 2025 AndrewSink
+Copyright (c) 2025 Zacsluss
+
+Original work and modifications by Zacsluss
+Third-party libraries (Three.js, html2canvas) maintain their respective licenses
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

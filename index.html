@@ -5,48 +5,7 @@
     <meta charset="UTF-8">
     <meta id="ascii" name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
     <title>ASCII 3D Modeler</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      .slider {
-        appearance: none;
-        background: rgba(55, 65, 81, 0.6);
-        border-radius: 0.25rem;
-        height: 0.25rem;
-      }
-      .slider::-webkit-slider-thumb {
-        appearance: none;
-        width: 1rem;
-        height: 1rem;
-        border-radius: 50%;
-        background: #3B82F6;
-        cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      }
-      .slider::-moz-range-thumb {
-        width: 1rem;
-        height: 1rem;
-        border-radius: 50%;
-        background: #3B82F6;
-        cursor: pointer;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-      }
-      .notification {
-        transform: translateX(100%);
-        backdrop-filter: blur(8px);
-      }
-      .notification.show {
-        transform: translateX(0);
-      }
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-5px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .fade-in {
-        animation: fadeIn 0.2s ease-out;
-      }
-    </style>
+    <link rel="stylesheet" href="libs/styles.css">
   </head>
 
   <body class="bg-gray-900 text-gray-300 font-sans overflow-hidden">
@@ -145,16 +104,15 @@
     </div>
 
     <div id="ui-container" class="absolute top-0 left-0 p-3 space-y-2 hidden md:block">
-      <div id="controls" class="space-y-3 p-4 bg-gray-800 bg-opacity-40 rounded-lg shadow-lg backdrop-blur-md border border-gray-700 border-opacity-20">
+      <div id="controls" class="space-y-5 p-4 bg-gray-800 bg-opacity-40 rounded-lg shadow-lg backdrop-blur-md border border-gray-700 border-opacity-20">
         <div class="text-center">
-          <h1 class="text-xl font-semibold text-white mb-0.5">ASCII 3D Modeler</h1>
-          <p class="text-gray-400 text-xs">Transform 3D models into beautiful ASCII art</p>
+          <h1 class="text-xl font-semibold text-white mb-2">ASCII 3D Modeler</h1>
         </div>
 
         <!-- File and View Controls -->
         <div class="control-group">
           <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('file-view')">
-            <h2 class="text-base font-medium text-blue-300 flex items-center gap-1.5">
+            <h2 class="text-base font-medium text-gray-300 flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"></path>
               </svg>
@@ -164,10 +122,10 @@
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
             </svg>
           </button>
-          <div id="file-view-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5 space-y-2">
+          <div id="file-view-content" class="bg-gray-700 bg-opacity-20 rounded-md p-4 mt-2 space-y-3">
             <div class="flex flex-col sm:flex-row gap-2">
               <input id="file-selector" name="files[]" style="display:none" type="file" accept=".stl,.obj,.ply">
-              <div class="relative group flex-1">
+              <div class="flex-1">
                 <button id="input-button" type="button"
                   class="w-full bg-blue-500 bg-opacity-80 hover:bg-blue-600 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-blue-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
                   onclick='document.getElementById("file-selector").click()'>
@@ -178,12 +136,8 @@
                     <span class="text-sm" id="upload-text">Upload STL</span>
                   </span>
                 </button>
-                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
-                  Supports STL, OBJ, PLY formats
-                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
-                </div>
               </div>
-              <div class="relative group">
+              <div>
                 <button id="lightDark" type="button"
                   class="w-full sm:w-auto bg-gray-600 bg-opacity-80 hover:bg-gray-500 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-gray-400 focus:outline-none backdrop-blur-sm">
                   <span class="flex items-center justify-center gap-1.5">
@@ -193,10 +147,6 @@
                     <span class="text-sm">Theme</span>
                   </span>
                 </button>
-                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
-                  Toggle dark/light mode
-                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
-                </div>
               </div>
             </div>
           </div>
@@ -205,7 +155,7 @@
         <!-- Model Controls -->
         <div class="control-group">
           <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('model-controls')">
-            <h2 class="text-base font-medium text-green-300 flex items-center gap-1.5">
+            <h2 class="text-base font-medium text-purple-300 flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
               </svg>
@@ -215,43 +165,43 @@
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
             </svg>
           </button>
-          <div id="model-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5 space-y-3">
+          <div id="model-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-4 mt-2 space-y-4">
             <div class="flex flex-wrap gap-1.5">
               <button id="rotateButton" type="button"
-                class="bg-purple-500 bg-opacity-80 hover:bg-purple-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-purple-400 focus:outline-none backdrop-blur-sm">
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                  </svg>
-                  <span class="text-sm">Rotate Model</span>
-                </span>
-              </button>
+                  class="bg-purple-500 bg-opacity-80 hover:bg-purple-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-purple-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span class="text-sm">Rotate Model</span>
+                  </span>
+                </button>
               <button id="rotateLightButton" type="button"
-                class="bg-yellow-500 bg-opacity-80 hover:bg-yellow-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-yellow-400 focus:outline-none backdrop-blur-sm">
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
-                  </svg>
-                  <span class="text-sm">Rotate Light</span>
-                </span>
-              </button>
+                  class="bg-yellow-500 bg-opacity-80 hover:bg-yellow-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-yellow-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-sm">Rotate Light</span>
+                  </span>
+                </button>
               <button id="resetButton" type="button"
-                class="bg-red-500 bg-opacity-80 hover:bg-red-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-red-400 focus:outline-none backdrop-blur-sm">
-                <span class="flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                  </svg>
-                  <span class="text-sm">Reset</span>
-                </span>
-              </button>
+                  class="bg-red-500 bg-opacity-80 hover:bg-red-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-red-400 focus:outline-none backdrop-blur-sm">
+                  <span class="flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span class="text-sm">Reset</span>
+                  </span>
+                </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-1.5">
                 <div class="flex justify-between items-center">
                   <label for="lightSlider" class="text-xs font-medium text-gray-300">Light Rotation</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-yellow-300 font-mono backdrop-blur-sm" id="lightValue">45°</span>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-yellow-300 font-mono backdrop-blur-sm" id="lightValue">120°</span>
                 </div>
-                <input id="lightSlider" type="range" min="0" max="360" step="1" value="45" class="w-full slider" oninput="updateSliderValue('lightSlider', 'lightValue', '°')">
+                <input id="lightSlider" type="range" min="0" max="360" step="1" value="120" class="w-full slider" oninput="updateSliderValue('lightSlider', 'lightValue', '°')">
               </div>
               <div class="space-y-1.5">
                 <div class="flex justify-between items-center">
@@ -263,9 +213,9 @@
               <div class="space-y-1.5">
                 <div class="flex justify-between items-center">
                   <label for="rotateXSlider" class="text-xs font-medium text-gray-300">Rotate X</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateXValue">-90°</span>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateXValue">-75°</span>
                 </div>
-                <input id="rotateXSlider" type="range" min="-180" max="180" step="1" value="-90" class="w-full slider" oninput="updateSliderValue('rotateXSlider', 'rotateXValue', '°')">
+                <input id="rotateXSlider" type="range" min="-180" max="180" step="1" value="-75" class="w-full slider" oninput="updateSliderValue('rotateXSlider', 'rotateXValue', '°')">
               </div>
               <div class="space-y-1.5">
                 <div class="flex justify-between items-center">
@@ -284,9 +234,9 @@
               <div class="space-y-1.5">
                 <div class="flex justify-between items-center">
                   <label for="scaleSlider" class="text-xs font-medium text-gray-300">Scale</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-green-300 font-mono backdrop-blur-sm" id="scaleValue">1.00x</span>
+                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-green-300 font-mono backdrop-blur-sm" id="scaleValue">1.20x</span>
                 </div>
-                <input id="scaleSlider" type="range" min="0.1" max="3" step="0.01" value="1" class="w-full slider" oninput="updateSliderValue('scaleSlider', 'scaleValue', 'x')">
+                <input id="scaleSlider" type="range" min="0.1" max="3" step="0.01" value="1.2" class="w-full slider" oninput="updateSliderValue('scaleSlider', 'scaleValue', 'x')">
               </div>
             </div>
           </div>
@@ -295,7 +245,7 @@
         <!-- ASCII Controls -->
         <div class="control-group">
           <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('ascii-controls')">
-            <h2 class="text-base font-medium text-purple-300 flex items-center gap-1.5">
+            <h2 class="text-base font-medium text-gray-400 flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
               </svg>
@@ -305,13 +255,24 @@
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
             </svg>
           </button>
-          <div id="ascii-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <div class="flex-1">
-                <label for="newASCII" class="block text-xs font-medium text-gray-300 mb-1.5">ASCII Character Set</label>
-                <input id="newASCII" value="Custom Text"
-                  class="w-full bg-gray-600 bg-opacity-70 border border-gray-500 border-opacity-50 rounded-md px-2.5 py-1.5 text-white text-sm focus:ring-1 focus:ring-purple-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm">
+          <div id="ascii-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-4 mt-2">
+            <div class="space-y-3">
+              <!-- Pattern Selector -->
+              <div>
+                <label for="patternSelect" class="block text-xs font-medium text-gray-300 mb-1.5">ASCII Pattern</label>
+                <select id="patternSelect" class="w-full bg-gray-600 bg-opacity-70 border border-gray-500 border-opacity-50 rounded-md px-2.5 py-1.5 text-white text-sm focus:ring-1 focus:ring-purple-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm">
+                  <option value="classic" selected>Classic ASCII</option>
+                  <option value="blocks">Simple Characters</option>
+                  <option value="custom">Custom</option>
+                </select>
               </div>
+              
+              <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex-1">
+                  <label for="newASCII" class="block text-xs font-medium text-gray-300 mb-1.5">Custom Character Set</label>
+                  <input id="newASCII" value=" .:-+*=%@#" disabled
+                    class="w-full bg-gray-600 bg-opacity-70 border border-gray-500 border-opacity-50 rounded-md px-2.5 py-1.5 text-white text-sm focus:ring-1 focus:ring-purple-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm">
+                </div>
               <div class="flex gap-1.5 sm:flex-col sm:justify-end">
                 <button id="updateASCII" type="button"
                   class="bg-green-500 bg-opacity-80 hover:bg-green-600 hover:bg-opacity-90 text-white font-medium py-1.5 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-green-400 focus:outline-none backdrop-blur-sm">
@@ -339,7 +300,7 @@
         <!-- Export Controls -->
         <div class="control-group">
           <button class="w-full flex justify-between items-center p-2 hover:bg-gray-700 hover:bg-opacity-30 rounded-md transition-colors duration-200" onclick="toggleSection('export-controls')">
-            <h2 class="text-base font-medium text-orange-300 flex items-center gap-1.5">
+            <h2 class="text-base font-medium text-gray-400 flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
               </svg>
@@ -349,10 +310,9 @@
               <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
             </svg>
           </button>
-          <div id="export-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-3 mt-1.5">
+          <div id="export-controls-content" class="bg-gray-700 bg-opacity-20 rounded-md p-4 mt-2">
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              <div class="relative group">
-                <button id="clipboardASCII" type="button"
+              <button id="clipboardASCII" type="button"
                   class="w-full bg-indigo-500 bg-opacity-80 hover:bg-indigo-600 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-indigo-400 focus:outline-none backdrop-blur-sm">
                   <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,13 +321,7 @@
                     <span class="text-sm">Copy</span>
                   </span>
                 </button>
-                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
-                  Copy ASCII to clipboard
-                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
-                </div>
-              </div>
-              <div class="relative group">
-                <button id="copyASCII" type="button"
+              <button id="copyASCII" type="button"
                   class="w-full bg-teal-500 bg-opacity-80 hover:bg-teal-600 hover:bg-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-teal-400 focus:outline-none backdrop-blur-sm">
                   <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -376,13 +330,7 @@
                     <span class="text-sm">Download</span>
                   </span>
                 </button>
-                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
-                  Download as text file
-                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
-                </div>
-              </div>
-              <div class="relative group">
-                <button id="screenshotButton" type="button"
+              <button id="screenshotButton" type="button"
                   class="w-full bg-pink-500 bg-opacity-80 hover:bg-pink-600 hover:bg-pink-opacity-90 text-white font-medium py-2 px-3 rounded-md transition-all duration-200 shadow-sm hover:shadow-md focus:ring-1 focus:ring-pink-400 focus:outline-none backdrop-blur-sm">
                   <span class="flex items-center justify-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -392,22 +340,17 @@
                     <span class="text-sm">Screenshot</span>
                   </span>
                 </button>
-                <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-gray-900 bg-opacity-90 text-white text-xs rounded py-1.5 px-2 whitespace-nowrap z-10 backdrop-blur-sm">
-                  Capture screenshot
-                  <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-0.5 w-1.5 h-1.5 bg-gray-900 bg-opacity-90 rotate-45"></div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/effects/AsciiEffect.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.0.0-rc.5/dist/html2canvas.min.js"></script>
+    <script src="libs/three.min.js"></script>
+    <script src="libs/OrbitControls.js"></script>
+    <script src="libs/STLLoader.js"></script>
+    <script src="libs/AsciiEffect.js"></script>
+    <script src="libs/html2canvas.min.js"></script>
     
     <script>
       // Mobile Drawer Functionality
