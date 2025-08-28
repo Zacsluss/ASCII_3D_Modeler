@@ -75,13 +75,6 @@
       </svg>
     </button>
 
-    <!-- Notification Area -->
-    <div id="notification" class="fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification hidden">
-      <div class="flex items-center gap-2">
-        <svg id="notification-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"></svg>
-        <span id="notification-text" class="text-white font-medium text-sm"></span>
-      </div>
-    </div>
 
     <div id="ui-container" class="absolute top-0 left-0 p-3 space-y-2 hidden md:block">
       <div id="controls" class="space-y-5 p-4 bg-gray-800 bg-opacity-40 rounded-lg shadow-lg backdrop-blur-md border border-gray-700 border-opacity-20">
@@ -176,47 +169,29 @@
                 </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <div class="flex justify-between items-center">
-                  <label for="lightSlider" class="text-xs font-medium text-gray-300">Light Rotation</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-yellow-300 font-mono backdrop-blur-sm" id="lightValue">120°</span>
-                </div>
-                <input id="lightSlider" type="range" min="0" max="360" step="1" value="120" class="w-full slider" oninput="updateSliderValue('lightSlider', 'lightValue', '°')">
+              <div class="slider-group">
+                <div class="slider-container"><label class="slider-label">Light Rotation</label><span class="slider-value slider-yellow" id="lightValue">120°</span></div>
+                <input id="lightSlider" type="range" min="0" max="360" step="1" value="120" class="w-full slider">
               </div>
-              <div class="space-y-1.5">
-                <div class="flex justify-between items-center">
-                  <label for="lightHeightSlider" class="text-xs font-medium text-gray-300">Light Height</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-yellow-300 font-mono backdrop-blur-sm" id="lightHeightValue">2.0</span>
-                </div>
-                <input id="lightHeightSlider" type="range" min="-2" max="2" step="0.1" value="2" class="w-full slider" oninput="updateSliderValue('lightHeightSlider', 'lightHeightValue', '')">
+              <div class="slider-group">
+                <div class="slider-container"><label class="slider-label">Light Height</label><span class="slider-value slider-yellow" id="lightHeightValue">2.0</span></div>
+                <input id="lightHeightSlider" type="range" min="-2" max="2" step="0.1" value="2" class="w-full slider">
               </div>
-              <div class="space-y-1.5">
-                <div class="flex justify-between items-center">
-                  <label for="rotateXSlider" class="text-xs font-medium text-gray-300">Rotate X</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateXValue">-75°</span>
-                </div>
-                <input id="rotateXSlider" type="range" min="-180" max="180" step="1" value="-75" class="w-full slider" oninput="updateSliderValue('rotateXSlider', 'rotateXValue', '°')">
+              <div class="slider-group">
+                <div class="slider-container"><label class="slider-label">Rotate X</label><span class="slider-value slider-blue" id="rotateXValue">-75°</span></div>
+                <input id="rotateXSlider" type="range" min="-180" max="180" step="1" value="-75" class="w-full slider">
               </div>
-              <div class="space-y-1.5">
-                <div class="flex justify-between items-center">
-                  <label for="rotateYSlider" class="text-xs font-medium text-gray-300">Rotate Y</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateYValue">0°</span>
-                </div>
-                <input id="rotateYSlider" type="range" min="0" max="360" step="1" value="0" class="w-full slider" oninput="updateSliderValue('rotateYSlider', 'rotateYValue', '°')">
+              <div class="slider-group">
+                <div class="slider-container"><label class="slider-label">Rotate Y</label><span class="slider-value slider-blue" id="rotateYValue">0°</span></div>
+                <input id="rotateYSlider" type="range" min="0" max="360" step="1" value="0" class="w-full slider">
               </div>
-              <div class="space-y-1.5">
-                <div class="flex justify-between items-center">
-                  <label for="rotateZSlider" class="text-xs font-medium text-gray-300">Rotate Z</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-blue-300 font-mono backdrop-blur-sm" id="rotateZValue">0°</span>
-                </div>
-                <input id="rotateZSlider" type="range" min="0" max="360" step="1" value="0" class="w-full slider" oninput="updateSliderValue('rotateZSlider', 'rotateZValue', '°')">
+              <div class="slider-group">
+                <div class="slider-container"><label class="slider-label">Rotate Z</label><span class="slider-value slider-blue" id="rotateZValue">0°</span></div>
+                <input id="rotateZSlider" type="range" min="0" max="360" step="1" value="0" class="w-full slider">
               </div>
-              <div class="space-y-1.5">
-                <div class="flex justify-between items-center">
-                  <label for="scaleSlider" class="text-xs font-medium text-gray-300">Scale</label>
-                  <span class="text-xs bg-gray-600 bg-opacity-70 px-1.5 py-0.5 rounded text-green-300 font-mono backdrop-blur-sm" id="scaleValue">1.20x</span>
-                </div>
-                <input id="scaleSlider" type="range" min="0.1" max="3" step="0.01" value="1.2" class="w-full slider" oninput="updateSliderValue('scaleSlider', 'scaleValue', 'x')">
+              <div class="slider-group">
+                <div class="slider-container"><label class="slider-label">Scale</label><span class="slider-value slider-green" id="scaleValue">1.20x</span></div>
+                <input id="scaleSlider" type="range" min="0.1" max="3" step="0.01" value="1.2" class="w-full slider">
               </div>
             </div>
           </div>
@@ -332,144 +307,6 @@
     <script src="libs/AsciiEffect.js"></script>
     <script src="libs/html2canvas.min.js"></script>
     
-    <script>
-      // Mobile Drawer Functionality
-      function toggleMobileDrawer() {
-        const drawer = document.getElementById('mobile-drawer');
-        const isOpen = drawer.style.transform === 'translateY(0px)' || drawer.classList.contains('translate-y-0');
-        
-        if (isOpen) {
-          drawer.style.transform = 'translateY(100%)';
-          drawer.classList.remove('translate-y-0');
-        } else {
-          drawer.style.transform = 'translateY(0px)';
-          drawer.classList.add('translate-y-0');
-        }
-      }
-
-      // Enhanced UI Functionality
-      function toggleSection(sectionId) {
-        const content = document.getElementById(sectionId + '-content');
-        const icon = document.getElementById(sectionId + '-icon');
-        
-        if (content.style.display === 'none' || !content.style.display) {
-          content.style.display = 'block';
-          content.classList.add('fade-in');
-          icon.style.transform = 'rotate(180deg)';
-        } else {
-          content.style.display = 'none';
-          icon.style.transform = 'rotate(0deg)';
-        }
-      }
-      
-      function updateSliderValue(sliderId, valueId, suffix) {
-        const slider = document.getElementById(sliderId);
-        const valueDisplay = document.getElementById(valueId);
-        let value = parseFloat(slider.value);
-        
-        if (suffix === '°') {
-          valueDisplay.textContent = Math.round(value) + '°';
-        } else if (suffix === 'x') {
-          valueDisplay.textContent = value.toFixed(2) + 'x';
-        } else {
-          valueDisplay.textContent = value.toFixed(1);
-        }
-      }
-      
-      function showNotification(message, type = 'success') {
-        const notification = document.getElementById('notification');
-        const icon = document.getElementById('notification-icon');
-        const text = document.getElementById('notification-text');
-        
-        // Set icon and colors based on type
-        if (type === 'success') {
-          notification.className = 'fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification bg-green-600 bg-opacity-90 backdrop-blur-md';
-          icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>';
-        } else if (type === 'error') {
-          notification.className = 'fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification bg-red-600 bg-opacity-90 backdrop-blur-md';
-          icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>';
-        } else {
-          notification.className = 'fixed top-3 right-3 p-3 rounded-md shadow-lg transition-all duration-300 z-50 notification bg-blue-600 bg-opacity-90 backdrop-blur-md';
-          icon.innerHTML = '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>';
-        }
-        
-        text.textContent = message;
-        notification.classList.remove('hidden');
-        notification.classList.add('show');
-        
-        setTimeout(() => {
-          notification.classList.remove('show');
-          setTimeout(() => {
-            notification.classList.add('hidden');
-          }, 300);
-        }, 3000);
-      }
-      
-      function setButtonLoading(buttonId, isLoading) {
-        const button = document.getElementById(buttonId);
-        const originalHTML = button.innerHTML;
-        
-        if (isLoading) {
-          button.disabled = true;
-          button.innerHTML = `<svg class="animate-spin h-4 w-4 mx-auto" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-        } else {
-          button.disabled = false;
-          button.innerHTML = originalHTML;
-        }
-      }
-      
-      // Initialize sections (all collapsed by default except first)
-      document.addEventListener('DOMContentLoaded', function() {
-        // Initialize all sections as expanded
-        const sections = ['file-view', 'model-controls', 'ascii-controls', 'export-controls'];
-        sections.forEach(section => {
-          const content = document.getElementById(section + '-content');
-          const icon = document.getElementById(section + '-icon');
-          content.style.display = 'block';
-          icon.style.transform = 'rotate(180deg)';
-        });
-        
-        // Enhance file upload with drag and drop
-        const fileSelector = document.getElementById('file-selector');
-        const uploadButton = document.getElementById('input-button');
-        
-        // Add drag and drop to entire UI container
-        const uiContainer = document.getElementById('ui-container');
-        uiContainer.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          uiContainer.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-        });
-        
-        uiContainer.addEventListener('dragleave', (e) => {
-          e.preventDefault();
-          uiContainer.style.backgroundColor = '';
-        });
-        
-        uiContainer.addEventListener('drop', (e) => {
-          e.preventDefault();
-          uiContainer.style.backgroundColor = '';
-          const files = e.dataTransfer.files;
-          if (files.length > 0) {
-            fileSelector.files = files;
-            showNotification('File uploaded successfully!');
-          }
-        });
-        
-        // Enhanced button interactions
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach(button => {
-          if (button.id && !button.onclick && !button.getAttribute('onclick')) {
-            button.addEventListener('click', () => {
-              // Add subtle click animation
-              button.style.transform = 'scale(0.95)';
-              setTimeout(() => {
-                button.style.transform = 'scale(1)';
-              }, 100);
-            });
-          }
-        });
-      });
-    </script>
     
     <script src="script.js"></script>
   </body>

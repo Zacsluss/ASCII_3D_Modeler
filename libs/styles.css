@@ -7,6 +7,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .icon-md{width:1rem;height:1rem}
 .btn-base{cursor:pointer;font-weight:500;padding:0.375rem 0.75rem;border-radius:0.375rem;transition:all 0.2s;border:none;display:inline-flex;align-items:center;justify-content:center;gap:0.375rem}
 .btn-base:disabled{opacity:0.5;cursor:not-allowed}
+.btn-control{font-weight:500;padding:0.375rem 0.75rem;border-radius:0.375rem;transition:all 0.2s;text-white;border:none;box-shadow:0 1px 2px rgba(0,0,0,0.1);backdrop-filter:blur(4px)}
+.btn-control:hover{box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+.btn-control:focus{outline:none;box-shadow:0 0 0 1px var(--ring-color)}
+.btn-purple{background-color:rgba(168,85,247,0.8);--ring-color:#c084fc}
+.btn-purple:hover{background-color:rgba(147,51,234,0.9)}
+.btn-yellow{background-color:rgba(139,92,246,0.8);--ring-color:#facc15}
+.btn-yellow:hover{background-color:rgba(124,58,237,0.9)}
+.btn-red{background-color:rgba(159,18,57,0.8);--ring-color:#f87171}
+.btn-red:hover{background-color:rgba(127,29,61,0.9)}
+.btn-green{background-color:rgba(107,114,128,0.8);--ring-color:#4ade80}
+.btn-green:hover{background-color:rgba(75,85,99,0.9)}
 .section-header{width:100%;display:flex;justify-content:space-between;align-items:center;padding:0.5rem;border-radius:0.375rem;transition:color 0.2s}
 .section-header:hover{background-color:rgba(55,65,81,0.3)}
 .section-content{background-color:rgba(55,65,81,0.2);border-radius:0.375rem;padding:1rem;margin-top:0.5rem}
@@ -15,6 +26,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .slider-container{display:flex;justify-content:space-between;align-items:center}
 .slider-label{font-size:0.75rem;font-weight:500;color:#d1d5db}
 .slider-value{font-size:0.75rem;background-color:rgba(75,85,99,0.7);padding:0.125rem 0.375rem;border-radius:0.25rem;font-family:ui-monospace,monospace}
+.slider-group{margin-bottom:0.375rem}
+.slider-group .slider-container{margin-bottom:0.375rem}
+.slider-yellow{color:#fde047}
+.slider-blue{color:#93c5fd}
+.slider-green{color:#86efac}
 
 /* Layout utilities */
 .fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}
@@ -96,7 +112,6 @@ input[type="text"]:focus{outline:none;border-color:transparent;box-shadow:0 0 0 
 /* Animations */
 @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn 0.2s ease-out}
-.notification{transform:translateX(100%);backdrop-filter:blur(8px)}.notification.show{transform:translateX(0)}
 
 /* Utilities */
 .whitespace-nowrap{white-space:nowrap}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}

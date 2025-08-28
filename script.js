@@ -9,6 +9,7 @@ const cacheElement = (id) => elements[id] || (elements[id] = document.getElement
 
 // Performance optimization
 let animationId;
+let isAnimating = false;
 const clock = new THREE.Clock();
 const isMobileDevice = /(Mobi|Android|iPhone|iPad|iPod|Mobile)/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
@@ -113,15 +114,104 @@ function updateCharacters(newChars) {
     recreateEffect();
 }
 
-// File handling
+// Optimized animation loop (single instance)
+function startAnimation() {
+    if (isAnimating) return;
+    isAnimating = true;
+    
+    function tick() {
+        if (!isAnimating) return;
+        
+        if (isModelRotating && myMesh.geometry) {
+            myMesh.rotation.z += 0.01;
+        }
+        
+        if (isLightRotating) {
+            // Direct light manipulation instead of slider events
+            const angle = (clock.getElapsedTime() * 30) % 360; // 30 degrees per second
+            const radians = angle * Math.PI / 180;
+            pointLight1.position.set(Math.cos(radians) * 100, 100, Math.sin(radians) * 100);
+            
+            // Update slider display only
+            const lightSlider = cacheElement('lightSlider');
+            if (lightSlider) lightSlider.value = angle;
+            const lightValue = cacheElement('lightValue');
+            if (lightValue) lightValue.textContent = Math.round(angle) + '°';
+        }
+        
+        if (controls) controls.update();
+        if (effect && myMesh.geometry) effect.render(scene, camera);
+        animationId = requestAnimationFrame(tick);
+    }
+    tick();
+}
+
+function stopAnimation() {
+    isAnimating = false;
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+}
+
+// Optimized file handling
 function openFile(event) {
     const file = event.target.files[0];
     if (!file) return;
 
+    // Stop any existing animation
+    stopAnimation();
+    
     const reader = new FileReader();
     reader.onload = (e) => {
-        userUploaded = true;
-        const geometry = stlLoader.parse(e.target.result);
+        try {
+            userUploaded = true;
+            const geometry = stlLoader.parse(e.target.result);
+            geometry.computeBoundingBox();
+            
+            // Center geometry efficiently
+            const box = geometry.boundingBox;
+            const center = box.getCenter(new THREE.Vector3());
+            geometry.translate(-center.x, -center.y, -center.z);
+            
+            // Clean up old mesh
+            if (myMesh.geometry) {
+                myMesh.geometry.dispose();
+                scene.remove(myMesh);
+            }
+            
+            // Set up new mesh
+            myMesh.geometry = geometry;
+            myMesh.material = material;
+            myMesh.rotation.set(-75 * Math.PI / 180, 0, 0);
+            myMesh.scale.setScalar(1.2);
+            
+            scene.add(myMesh);
+            createOrbitControls();
+            
+            const uploadText = cacheElement('upload-text');
+            if (uploadText) uploadText.textContent = file.name;
+            
+            // Start single animation loop
+            startAnimation();
+            
+        } catch (error) {
+            console.error('Error loading file:', error);
+            alert('Error loading file. Please try a different file.');
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+// Initialize
+createEffect();
+camera.position.set(100, 100, 400);
+document.body.appendChild(effect.domElement);
+
+// Load default model efficiently
+stlLoader.load('./models/skull_mesh.stl', (geometry) => {
+    try {
+        userUploaded = false;
         geometry.computeBoundingBox();
         
         const center = geometry.boundingBox.getCenter(new THREE.Vector3());
@@ -134,54 +224,40 @@ function openFile(event) {
         
         scene.add(myMesh);
         createOrbitControls();
+        startAnimation();
         
-        cacheElement('upload-text').textContent = file.name;
-        
-        // Animation loop
-        function tick() {
-            if (isModelRotating) myMesh.rotation.z += 0.01;
-            if (isLightRotating) {
-                const lightSlider = cacheElement('lightSlider');
-                let currentAngle = (parseFloat(lightSlider.value) + 1) % 360;
-                lightSlider.value = currentAngle;
-                lightSlider.dispatchEvent(new Event('input'));
-            }
-            controls.update();
-            effect.render(scene, camera);
-            animationId = requestAnimationFrame(tick);
-        }
-        tick();
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-// Initialize
-createEffect();
-camera.position.set(100, 100, 400);
-document.body.appendChild(effect.domElement);
-
-// Load default model
-stlLoader.load('./models/skull_mesh.stl', (geometry) => {
-    openFile({ target: { files: [{ name: 'skull_mesh.stl' }] } });
+    } catch (error) {
+        console.error('Error loading default model:', error);
+    }
 });
 
 // Event handlers
 window.addEventListener('resize', onWindowResize);
 
-// Export functions
+// Optimized export functions
 const exportFunctions = {
     copyASCII: () => {
-        const text = document.getElementsByTagName("table")[0]?.innerText || '';
-        download('ASCII.txt', text);
+        const asciiElement = effect?.domElement?.querySelector('table') || effect?.domElement;
+        const text = asciiElement?.innerText || asciiElement?.textContent || '';
+        if (text) download('ASCII.txt', text);
     },
     clipboardASCII: () => {
-        const textArea = document.createElement("textarea");
-        textArea.textContent = document.getElementsByTagName("td")[0]?.innerText || '';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert("ASCII copied to clipboard");
+        const asciiElement = effect?.domElement?.querySelector('table') || effect?.domElement;
+        const text = asciiElement?.innerText || asciiElement?.textContent || '';
+        if (text) {
+            navigator.clipboard?.writeText(text).then(() => {
+                alert("ASCII copied to clipboard");
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert("ASCII copied to clipboard");
+            });
+        }
     }
 };
 
@@ -211,8 +287,9 @@ const eventHandlers = {
         updateButtonUI('rotateLightButton', isLightRotating, 'Pause Light', 'Rotate Light');
     }],
     'resetButton': ['click', resetPositions],
-    'mobile-menu-button': ['click', () => cacheElement('ui-container').classList.toggle('hidden')],
+    'mobile-menu-button': ['click', toggleMobileDrawer],
     'mobile-upload': ['click', () => cacheElement('file-selector').click()],
+    'mobile-reset': ['click', resetPositions],
     'patternSelect': ['change', function() {
         const customInput = cacheElement('newASCII');
         if (this.value === 'custom') {
@@ -252,24 +329,36 @@ const debounce = (func, wait) => {
         element.addEventListener('input', debounce((e) => {
             const value = parseFloat(e.target.value);
             if (id === 'scaleSlider') {
-                myMesh.scale.setScalar(value);
+                if (myMesh.geometry) myMesh.scale.setScalar(value);
+                const valueDisplay = cacheElement('scaleValue');
+                if (valueDisplay) valueDisplay.textContent = value.toFixed(2) + 'x';
             } else if (id === 'lightSlider') {
                 const angle = value * Math.PI / 180;
                 pointLight1.position.set(Math.cos(angle) * 100, 100, Math.sin(angle) * 100);
+                const valueDisplay = cacheElement('lightValue');
+                if (valueDisplay) valueDisplay.textContent = Math.round(value) + '°';
             } else if (id === 'lightHeightSlider') {
                 pointLight1.position.y = value * 50 + 100;
+                const valueDisplay = cacheElement('lightHeightValue');
+                if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
             }
         }, 16));
     }
 });
 
-// Rotation sliders
+// Rotation sliders with value display
 ['X', 'Y', 'Z'].forEach(axis => {
     const element = cacheElement(`rotate${axis}Slider`);
     if (element) {
         element.addEventListener('input', debounce((e) => {
-            const value = parseFloat(e.target.value) * Math.PI / 180;
-            myMesh.rotation[axis.toLowerCase()] = axis === 'X' ? value : value;
+            const degrees = parseFloat(e.target.value);
+            const radians = degrees * Math.PI / 180;
+            if (myMesh.geometry) {
+                myMesh.rotation[axis.toLowerCase()] = radians;
+            }
+            // Update value display
+            const valueDisplay = cacheElement(`rotate${axis}Value`);
+            if (valueDisplay) valueDisplay.textContent = Math.round(degrees) + '°';
         }, 16));
     }
 });
@@ -358,7 +447,7 @@ function download(filename, text) {
 updateButtonUI('rotateButton', isModelRotating, 'Pause Rotate', 'Rotate Model');
 updateButtonUI('rotateLightButton', isLightRotating, 'Pause Light', 'Rotate Light');
 
-// Initialize sections as expanded
+// Initialize sections as expanded and add drag & drop
 document.addEventListener('DOMContentLoaded', () => {
     ['file-view', 'model-controls', 'ascii-controls', 'export-controls'].forEach(section => {
         const content = cacheElement(section + '-content');
@@ -368,4 +457,28 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.style.transform = 'rotate(180deg)';
         }
     });
+    
+    // Add drag and drop functionality
+    const uiContainer = cacheElement('ui-container');
+    if (uiContainer) {
+        uiContainer.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uiContainer.style.backgroundColor = 'rgba(168, 85, 247, 0.1)';
+        });
+        
+        uiContainer.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uiContainer.style.backgroundColor = '';
+        });
+        
+        uiContainer.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uiContainer.style.backgroundColor = '';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                cacheElement('file-selector').files = files;
+                openFile({ target: { files: [files[0]] } });
+            }
+        });
+    }
 });

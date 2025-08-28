@@ -8,7 +8,9 @@
       "Bash(git push:*)",
       "Bash(git log:*)",
       "WebFetch(domain:cdnjs.cloudflare.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "Bash(comm:*)"
     ],
     "deny": [],
     "ask": []
