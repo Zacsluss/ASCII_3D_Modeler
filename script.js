@@ -290,6 +290,11 @@ const eventHandlers = {
     'mobile-menu-button': ['click', toggleMobileDrawer],
     'mobile-upload': ['click', () => cacheElement('file-selector').click()],
     'mobile-reset': ['click', resetPositions],
+    'input-button': ['click', () => cacheElement('file-selector').click()],
+    'file-view-toggle': ['click', () => toggleSection('file-view')],
+    'model-controls-toggle': ['click', () => toggleSection('model-controls')],
+    'ascii-controls-toggle': ['click', () => toggleSection('ascii-controls')],
+    'export-controls-toggle': ['click', () => toggleSection('export-controls')],
     'patternSelect': ['change', function() {
         const customInput = cacheElement('newASCII');
         if (this.value === 'custom') {
@@ -452,9 +457,22 @@ document.addEventListener('DOMContentLoaded', () => {
     ['file-view', 'model-controls', 'ascii-controls', 'export-controls'].forEach(section => {
         const content = cacheElement(section + '-content');
         const icon = cacheElement(section + '-icon');
+        const button = cacheElement(section);
+        
         if (content && icon) {
             content.style.display = 'block';
             icon.style.transform = 'rotate(180deg)';
+        }
+        
+        // Add section toggle functionality
+        if (button) {
+            button.addEventListener('click', () => toggleSection(section));
+        } else {
+            // Fallback: find button by looking for onclick attribute pattern
+            const sectionButton = document.querySelector(`[onclick*="${section}"]`);
+            if (sectionButton) {
+                sectionButton.addEventListener('click', () => toggleSection(section));
+            }
         }
     });
     

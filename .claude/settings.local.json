@@ -10,7 +10,8 @@
       "WebFetch(domain:cdnjs.cloudflare.com)",
       "Bash(curl:*)",
       "Bash(grep:*)",
-      "Bash(comm:*)"
+      "Bash(comm:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
