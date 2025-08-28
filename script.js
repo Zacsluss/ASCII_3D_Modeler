@@ -246,7 +246,19 @@ function updateASCII() {
         document.body.removeChild(effect.domElement)
     }
 
-    characters = document.getElementById('newASCII').value;
+    let customChars = document.getElementById('newASCII').value;
+    
+    // Ensure first character is always a space for proper background
+    if (customChars.length > 0 && customChars.charAt(0) !== ' ') {
+        customChars = ' ' + customChars;
+    }
+    
+    // Fallback to classic if empty
+    if (customChars.trim().length === 0) {
+        customChars = ' .:-+*=%@#';
+    }
+    
+    characters = customChars;
 
     createEffect()
     onWindowResize()
@@ -440,8 +452,15 @@ document.getElementById('patternSelect').addEventListener('change', function() {
         customInput.disabled = true;
         customInput.value = asciiPatterns[selectedPattern];
         
-        // Update the actual characters and effect
-        characters = asciiPatterns[selectedPattern];
+        // Update the actual characters and effect  
+        let newChars = asciiPatterns[selectedPattern];
+        
+        // Ensure first character is always a space for proper background
+        if (newChars.length > 0 && newChars.charAt(0) !== ' ') {
+            newChars = ' ' + newChars;
+        }
+        
+        characters = newChars;
         
         // Recreate the effect with new characters
         if (effect && effect.domElement) {
