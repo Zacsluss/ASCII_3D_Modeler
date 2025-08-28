@@ -184,7 +184,7 @@ function openFile(event) {
             myMesh.geometry = geometry;
             myMesh.material = material;
             myMesh.rotation.set(-75 * Math.PI / 180, 0, 0);
-            myMesh.scale.setScalar(1.2);
+            myMesh.scale.setScalar(2.0);
             
             scene.add(myMesh);
             createOrbitControls();
@@ -220,7 +220,7 @@ stlLoader.load('./models/skull_mesh.stl', (geometry) => {
         myMesh.geometry = geometry;
         myMesh.material = material;
         myMesh.rotation.set(-75 * Math.PI / 180, 0, 0);
-        myMesh.scale.setScalar(1.2);
+        myMesh.scale.setScalar(2.0);
         
         scene.add(myMesh);
         createOrbitControls();
@@ -387,7 +387,7 @@ function resetPositions() {
             if (slider) {
                 slider.value = id === 'lightSlider' ? 120 : 
                               id === 'rotateXSlider' ? -75 : 
-                              id === 'scaleSlider' ? 1.2 : 
+                              id === 'scaleSlider' ? 2.0 : 
                               id === 'lightHeightSlider' ? 2 : 0;
                 slider.dispatchEvent(new Event('input'));
             }
