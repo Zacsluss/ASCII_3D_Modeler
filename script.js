@@ -169,10 +169,18 @@ function openFile(event) {
             const geometry = stlLoader.parse(e.target.result);
             geometry.computeBoundingBox();
             
-            // Center geometry efficiently
+            // Center geometry efficiently for proper pivoting
             const box = geometry.boundingBox;
             const center = box.getCenter(new THREE.Vector3());
-            geometry.translate(-center.x, -center.y + 20, -center.z);
+            const size = box.getSize(new THREE.Vector3());
+            
+            // Translate so the geometric center becomes the pivot point
+            geometry.translate(-center.x, -center.y, -center.z);
+            
+            // Additional centering to ensure perfect pivot
+            geometry.computeBoundingBox();
+            const newCenter = geometry.boundingBox.getCenter(new THREE.Vector3());
+            geometry.translate(-newCenter.x, -newCenter.y, -newCenter.z);
             
             // Clean up old mesh
             if (myMesh.geometry) {
@@ -188,6 +196,7 @@ function openFile(event) {
             
             scene.add(myMesh);
             createOrbitControls();
+            
             
             const uploadText = cacheElement('upload-text');
             if (uploadText) uploadText.textContent = file.name;
@@ -205,7 +214,7 @@ function openFile(event) {
 
 // Initialize
 createEffect();
-camera.position.set(100, 100, 400);
+camera.position.set(100, 450, 400);
 document.body.appendChild(effect.domElement);
 
 // Load default model efficiently
@@ -215,15 +224,25 @@ stlLoader.load('./models/skull_mesh.stl', (geometry) => {
         geometry.computeBoundingBox();
         
         const center = geometry.boundingBox.getCenter(new THREE.Vector3());
+        const size = geometry.boundingBox.getSize(new THREE.Vector3());
+        
+        // Translate so the geometric center becomes the pivot point
         geometry.translate(-center.x, -center.y, -center.z);
+        
+        // Additional centering to ensure perfect pivot
+        geometry.computeBoundingBox();
+        const newCenter = geometry.boundingBox.getCenter(new THREE.Vector3());
+        geometry.translate(-newCenter.x, -newCenter.y, -newCenter.z);
         
         myMesh.geometry = geometry;
         myMesh.material = material;
-        myMesh.rotation.set(-75 * Math.PI / 180, 0, 0);
+        myMesh.rotation.set(-60 * Math.PI / 180, 0, 0);
         myMesh.scale.setScalar(2.0);
         
         scene.add(myMesh);
         createOrbitControls();
+        
+        
         startAnimation();
         
     } catch (error) {
