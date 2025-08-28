@@ -172,7 +172,7 @@ function openFile(event) {
             // Center geometry efficiently
             const box = geometry.boundingBox;
             const center = box.getCenter(new THREE.Vector3());
-            geometry.translate(-center.x, -center.y, -center.z);
+            geometry.translate(-center.x, -center.y + 20, -center.z);
             
             // Clean up old mesh
             if (myMesh.geometry) {
